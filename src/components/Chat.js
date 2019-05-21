@@ -5,57 +5,6 @@ import { CometChat } from '@cometchat-pro/chat';
 const MESSAGE_LISTENER_KEY = 'listener-key';
 const limit = 30;
 
-const ChatBox = props => {
-    const { chat, chatIsLoading, user } = props;
-    if (chatIsLoading) {
-        return (
-            <div className='col-xl-12 my-auto text-center'>
-                <MDSpinner size='72' />
-            </div>
-        );
-    } else {
-        return (
-            <div className='col-xl-12'>
-                {chat.map(chat => (
-                    <div key={chat.id} className='message'>
-                        <div className={`${chat.receiver !== user.uid ? 'balon1' : 'balon2'} p-3 m-1`}>
-                            {chat.text}
-                        </div>
-                    </div>
-                ))}
-                <div id='ChartBoxEnd'/>
-            </div>
-        );
-    }
-};
-
-const FriendList = props => {
-    const { friends, friendsIsLoading, selectedFriend } = props;
-    if (friendIsLoading) {
-        return (
-            <div>
-                <MDSpinner size='72' />
-            </div>
-        );
-    } else {
-        return (
-            <ul className='list-group list-group-flush w-100'>
-                {friends.map(freind => (
-                    <li>
-                        key={friend.uid}
-                        className={`list-group-item ${
-                            friend.uid === selectedFriend ? 'active' : ''
-                        }`}
-                        onClick={() => props.selectFriend(friend.uid)}>
-                        {friend.name}
-                    </li>
-                ))}
-
-            </ul>
-        )
-    }
-}
-
 const Chat = ({user}) => {
     const [friends, setFriends] = useState([]);
     const [selectedFriends, setSelectedFriends] = useState(null);
@@ -87,7 +36,6 @@ const Chat = ({user}) => {
                 CometChat.logout();
             }
     }, []);
-
     return (
         <div className='container-fluid'>
             <div className='row'>
@@ -153,5 +101,56 @@ const Chat = ({user}) => {
         </div>
     );
 };
+
+const ChatBox = props => {
+    const { chat, chatIsLoading, user } = props;
+    if (chatIsLoading) {
+        return (
+            <div className='col-xl-12 my-auto text-center'>
+                <MDSpinner size='72' />
+            </div>
+        );
+    } else {
+        return (
+            <div className='col-xl-12'>
+                {chat.map(chat => (
+                    <div key={chat.id} className='message'>
+                        <div className={`${chat.receiver !== user.uid ? 'balon1' : 'balon2'} p-3 m-1`}>
+                            {chat.text}
+                        </div>
+                    </div>
+                ))}
+                <div id='ChartBoxEnd'/>
+            </div>
+        );
+    }
+};
+
+const FriendList = props => {
+    const { friends, friendsIsLoading, selectedFriend } = props;
+    if (friendIsLoading) {
+        return (
+            <div>
+                <MDSpinner size='72' />
+            </div>
+        );
+    } else {
+        return (
+            <ul className='list-group list-group-flush w-100'>
+                {friends.map(freind => (
+                    <li>
+                        key={friend.uid}
+                        className={`list-group-item ${
+                            friend.uid === selectedFriend ? 'active' : ''
+                        }`}
+                        onClick={() => props.selectFriend(friend.uid)}>
+                        {friend.name}
+                    </li>
+                ))}
+
+            </ul>
+        )
+    }
+}
 
 export default Chat;
