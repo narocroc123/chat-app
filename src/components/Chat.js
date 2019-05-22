@@ -5,9 +5,65 @@ import { CometChat } from '@cometchat-pro/chat';
 const MESSAGE_LISTENER_KEY = 'listener-key';
 const limit = 30;
 
+const ChatBox = props => {
+    const { chat, chatIsLoading, user } = props;
+    if (chatIsLoading) {
+        return (
+            <div className='col-xl-12 my-auto text-center'>
+                <MDSpinner size='72' />
+            </div>
+        );
+    } else {
+        return (
+            <div className='col-xl-12'>
+                {chat.map(chat => (
+                    <div key={chat.id} className='message'>
+                        <div className={`${chat.receiver !== user.uid ? 'balon1' : 'balon2'} p-3 m-1`}>
+                            {chat.text}
+                        </div>
+                    </div>
+                ))}
+                <div id='ChatBoxEnd'/>
+            </div>
+        );
+    }
+};
+
+const scrollToBottom = () => {
+    let node = document.getElementById('ChatBoxEnd');
+    node.scrollIntoView();
+};
+
+const FriendsList = props => {
+    const { friends, friendIsLoading, selectedFriend } = props;
+    if (friendIsLoading) {
+        return (
+            <div className='col-xl-12 my-auto text-center'>
+                <MDSpinner size='72' />
+            </div>
+        );
+    } else {
+        return (
+            <ul className='list-group list-group-flush w-100'>
+                {friends.map(friend => (
+                    <li>
+                        key={friend.uid}
+                        className={`list-group-item ${
+                            friend.uid === selectedFriend ? 'active' : ''
+                        }`}
+                        onClick={() => props.selectFriend(friend.uid)}>
+                        {friend.name}
+                    </li>
+                ))}
+
+            </ul>
+        )
+    }
+}
+
 const Chat = ({user}) => {
     const [ friends, setFriends ] = useState([]);
-    const [ selectedFriends, setSelectedFriends ] = useState(null);
+    const [ selectedFriend, setSelectedFriend ] = useState(null);
     const [ chat, setChat ] = useState([]);
     const [ chatIsLoading, setChatIsLoading ] = useState(false);
     const [ friendIsLoading, setFriendIsLoading ] = useState(true);
@@ -23,8 +79,8 @@ const Chat = ({user}) => {
             .then(
                 userList => {
                     console.log('User list received', userList);
-                    setFreinds(userList);
-                    setFriendsIsLoading(false);
+                    setFriends(userList);
+                    setFriendIsLoading(false);
                 },
                 error => {
                     console.log('User list fetching failed with error:', error);
@@ -37,7 +93,7 @@ const Chat = ({user}) => {
             }
     }, []);
 
-    const selectFriends = uid => {
+    const selectFriend = uid => {
         setSelectedFriend(uid);
         setChat([]);
         setChatIsLoading(true);
@@ -71,13 +127,33 @@ const Chat = ({user}) => {
                     onTextMessageReceived: message => {
                         console.log('Incoming Message Log:', { message });
                         if(selectedFriend === message.send.uid) {
-                            setChat(prevState => [...previousState, message]);
+                            setChat(prevState => [...prevState, message]);
                         }
                     }
                 })
             )
         }
     }, [selectedFriend]);
+
+    const handleSubmit = event => {
+        event.preventDefault();
+        let textMessage = new CometChat.TextMessage(
+            selectedFriend,
+            message,
+            CometChat.MESSAGE_TYPE.TEXT,
+            CometChat.RECEIVER_TYPE.USER
+        );
+        CometChat.sendMessage(textMessage).then(
+            message => {
+                console.log('Message sent successfully:', message);
+                setChat([...chat, message]);
+            },
+            error => {
+                console.log('Message sending failed with error:', error);
+            }
+        )
+        setMessage('');
+    };
 
     return (
         <div className='container-fluid'>
@@ -94,7 +170,7 @@ const Chat = ({user}) => {
                                 style={{height: '100%', overflow: 'auto'}}>
                             <FriendsList
                                 friends={friends}
-                                friendsIsLoading={friendsIsLoading}
+                                friendIsLoading={friendIsLoading}
                                 selectedFriend={selectedFriend}
                                 selectFriend={selectFriend}
                             />    
@@ -144,77 +220,5 @@ const Chat = ({user}) => {
         </div>
     );
 };
-
-const ChatBox = props => {
-    const { chat, chatIsLoading, user } = props;
-    if (chatIsLoading) {
-        return (
-            <div className='col-xl-12 my-auto text-center'>
-                <MDSpinner size='72' />
-            </div>
-        );
-    } else {
-        return (
-            <div className='col-xl-12'>
-                {chat.map(chat => (
-                    <div key={chat.id} className='message'>
-                        <div className={`${chat.receiver !== user.uid ? 'balon1' : 'balon2'} p-3 m-1`}>
-                            {chat.text}
-                        </div>
-                    </div>
-                ))}
-                <div id='ChartBoxEnd'/>
-            </div>
-        );
-    }
-};
-
-const handleSubmit = event => {
-    event.preventDefault();
-    let textMessage = new CometChat.TextMessage(
-        selectedFriend,
-        message,
-        CometChat.MESSAGE_TYPE.TEXT,
-        CometChat.RECEIVER_TYPE.USER
-    );
-    CometChat.sendMessage(textMessage)
-        .then(
-            message => {
-                console.log('Message sent successfully:', message);
-                setChat([...chat, message]);
-            },
-            error => {
-                console.log('Message sending failed with error:', error);
-            }
-        );
-        setMessage('');
-};
-
-const FriendList = props => {
-    const { friends, friendsIsLoading, selectedFriend } = props;
-    if (friendIsLoading) {
-        return (
-            <div className='col-xl-12 my-auto text-center'>
-                <MDSpinner size='72' />
-            </div>
-        );
-    } else {
-        return (
-            <ul className='list-group list-group-flush w-100'>
-                {friends.map(freind => (
-                    <li>
-                        key={friend.uid}
-                        className={`list-group-item ${
-                            friend.uid === selectedFriend ? 'active' : ''
-                        }`}
-                        onClick={() => props.selectFriend(friend.uid)}>
-                        {friend.name}
-                    </li>
-                ))}
-
-            </ul>
-        )
-    }
-}
 
 export default Chat;
