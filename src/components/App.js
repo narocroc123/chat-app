@@ -7,7 +7,7 @@ import Login from './Login';
 import Chat from './Chat';
 
 const App = () => {
-    const [user, setUser] = useState(null);
+    const [ user, setUser ] = useState(null);
     const renderApp = () => {
         // Renders chat compnenet when users state is not null
         if (user) {

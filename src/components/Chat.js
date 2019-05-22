@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import MDSpinner from 'react-md-spinner';
 import { CometChat } from '@cometchat-pro/chat';
 
@@ -6,12 +6,12 @@ const MESSAGE_LISTENER_KEY = 'listener-key';
 const limit = 30;
 
 const Chat = ({user}) => {
-    const [friends, setFriends] = useState([]);
-    const [selectedFriends, setSelectedFriends] = useState(null);
-    const [chat, setChat] = useState([]);
-    const [chatIsLoading, setChatIsLoading] = useState(false);
-    const [friendIsLoading, setFriendIsLoading] = useState(true);
-    const [message, setMessage] = useState('');
+    const [ friends, setFriends ] = useState([]);
+    const [ selectedFriends, setSelectedFriends ] = useState(null);
+    const [ chat, setChat ] = useState([]);
+    const [ chatIsLoading, setChatIsLoading ] = useState(false);
+    const [ friendIsLoading, setFriendIsLoading ] = useState(true);
+    const [ message, setMessage ] = useState('');
     
     // useEffect fetches all users available to chat
     // calling wiht an empty array means useEffect will only be called on mount
@@ -36,6 +36,49 @@ const Chat = ({user}) => {
                 CometChat.logout();
             }
     }, []);
+
+    const selectFriends = uid => {
+        setSelectedFriend(uid);
+        setChat([]);
+        setChatIsLoading(true);
+    };
+
+    useEffect(() => {
+        // Runs when selectedFriends value is updated
+        if(selectedFriend) {
+            let messageRequest = new CometChat.MessagesRequestBuilder()
+                .setUID(selectedFriend)
+                .setLimit(limit)
+                .build();
+            
+            messageRequest.fetchPrevious()
+                .then(
+                    messages => {
+                        setChat(messages);
+                        setChatIsLoading(false);
+                        scrollToBottom();
+                }, 
+                error => {
+                    console.log('Message fetching failed with error:', error);
+                }
+            );
+
+            CometChat.removeMessageListener(MESSAGE_LISTENER_KEY);
+
+            CometChat.addMessageListener(
+                MESSAGE_LISTENER_KEY,
+                new CometChat.MessageListener({
+                    onTextMessageReceived: message => {
+                        console.log('Incoming Message Log:', { message });
+                        if(selectedFriend === message.send.uid) {
+                            setChat(prevState => [...previousState, message]);
+                        }
+                    }
+                })
+            )
+        }
+    }, [selectedFriend]);
+
     return (
         <div className='container-fluid'>
             <div className='row'>
@@ -126,11 +169,32 @@ const ChatBox = props => {
     }
 };
 
+const handleSubmit = event => {
+    event.preventDefault();
+    let textMessage = new CometChat.TextMessage(
+        selectedFriend,
+        message,
+        CometChat.MESSAGE_TYPE.TEXT,
+        CometChat.RECEIVER_TYPE.USER
+    );
+    CometChat.sendMessage(textMessage)
+        .then(
+            message => {
+                console.log('Message sent successfully:', message);
+                setChat([...chat, message]);
+            },
+            error => {
+                console.log('Message sending failed with error:', error);
+            }
+        );
+        setMessage('');
+};
+
 const FriendList = props => {
     const { friends, friendsIsLoading, selectedFriend } = props;
     if (friendIsLoading) {
         return (
-            <div>
+            <div className='col-xl-12 my-auto text-center'>
                 <MDSpinner size='72' />
             </div>
         );
