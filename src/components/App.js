@@ -5,7 +5,6 @@ import './App.css';
 import { NotificationContainer } from 'react-notifications';
 import Login from './Login';
 import Chat from './Chat';
-import Chat from './Chat';
 
 const App = () => {
     const [ user, setUser ] = useState(null);
