@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { NotificationManager } from 'react-notifications';
-import { CometChat } from '@cometchat-pro/chat';
+import React, {useState} from 'react';
+import {NotificationManager} from 'react-notifications';
+import {CometChat} from '@cometchat-pro/chat';
 import config from '../config'
 
 const Login = props => {
-    const [ uidValue, setUidValue ] = useState('');
-    const [ isSubmitting, setIsSubmitting ] = useState(false);
+    const [uidValue, setUidValue] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = event => {
         event.preventDefault();
