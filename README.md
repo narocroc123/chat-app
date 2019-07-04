@@ -2,6 +2,7 @@
 
 A real-time messaging application, using the CometChat API to host the back-end of the application. It utilising React Hooks to use state without implementing classes, and is stylised with Bootstrap.
 
+This application is hosted on [Heroku](https://chat-app-hooks.herokuapp.com/).
 
 ## How To Contribute
 
